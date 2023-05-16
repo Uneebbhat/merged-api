@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Merged Data</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+    <h1>Merged Data</h1>
+
+    <div id="merged-data"></div>
+
+    <script>
+        // Make the API request
+        axios.get('https://jsonplaceholder.typicode.com/photos')
+            .then(photosResponse => {
+                return axios.get('https://jsonplaceholder.typicode.com/users')
+                    .then(usersResponse => {
+                        return axios.get('https://jsonplaceholder.typicode.com/posts')
+                            .then(postsResponse => {
+                                const photos = photosResponse.data;
+                                const users = usersResponse.data;
+                                const posts = postsResponse.data;
+
+                                // Merge the data based on a common identifier (e.g., userId)
+                                const mergedData = posts.map(post => {
+                                    const user = users.find(user => user.id === post.userId);
+                                    const photo = photos.find(photo => photo.id === post.id);
+
+                                    return {
+                                        id: post.id,
+                                        title: post.title,
+                                        body: post.body,
+                                        user,
+                                        photo
+                                    };
+                                });
+
+                                // Display the merged data on the page
+                                const mergedDataElement = document.getElementById('merged-data');
+                                mergedDataElement.innerText = JSON.stringify(mergedData, null, 2);
+                            });
+                    });
+            })
+            .catch(error => {
+                const mergedDataElement = document.getElementById('merged-data');
+                mergedDataElement.innerText = 'Error: ' + error.message;
+            });
+    </script>
+</body>
+
+</html>
